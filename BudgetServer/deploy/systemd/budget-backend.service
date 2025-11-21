@@ -1,0 +1,19 @@
+[Unit]
+Description=Budget Backend Service
+After=network.target
+
+[Service]
+Environment=NODE_ENV=production
+EnvironmentFile=/path/to/BudgetServer/.env
+WorkingDirectory=/path/to/BudgetServer
+ExecStart=/usr/bin/node index.js
+Restart=always
+RestartSec=5
+User=www-data
+Group=www-data
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=budget-backend
+
+[Install]
+WantedBy=multi-user.target
