@@ -3,6 +3,8 @@ const express = require('express');
 const Income = require('../models/Income');
 const { getCurrentMonth } = require('../utils/date');
 
+const ALLOWED_CATEGORIES = ['Tips', 'Checks', 'Other'];
+
 const router = express.Router();
 
 // GET /api/incomes?month=YYYY-MM
@@ -20,6 +22,8 @@ router.get('/', async (req, res) => {
         userId: i.userId.toString(),
         description: i.description,
         amount: i.amount,
+        category: i.category || 'Other',
+        hoursWorked: i.hoursWorked ?? null,
         date: i.date,
         month: i.month,
       }))
@@ -33,7 +37,7 @@ router.get('/', async (req, res) => {
 // POST /api/incomes
 router.post('/', async (req, res) => {
   try {
-    let { description, amount, date } = req.body;
+    let { description, amount, date, category, hoursWorked } = req.body;
 
     amount = Number(amount) || 0;
 
@@ -43,11 +47,18 @@ router.post('/', async (req, res) => {
     }
 
     const month = date.slice(0, 7);
+    const cat = ALLOWED_CATEGORIES.includes(category) ? category : 'Other';
+    const hours =
+      cat === 'Tips' && hoursWorked !== undefined
+        ? Number(hoursWorked) || 0
+        : null;
 
     const inc = await Income.create({
       userId: req.userId,
       description: (description || '').trim() || 'Income',
       amount,
+      category: cat,
+      hoursWorked: hours,
       date,
       month,
     });
@@ -57,6 +68,8 @@ router.post('/', async (req, res) => {
       userId: inc.userId.toString(),
       description: inc.description,
       amount: inc.amount,
+      category: inc.category,
+      hoursWorked: inc.hoursWorked,
       date: inc.date,
       month: inc.month,
     });

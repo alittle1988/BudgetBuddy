@@ -3,10 +3,8 @@ import { useEffect } from "react";
 
 export function useAuthBootstrap(setUser, navigate) {
   useEffect(() => {
-    const storedToken =
-      sessionStorage.getItem("token") || localStorage.getItem("token");
-    const storedUserRaw =
-      sessionStorage.getItem("user") || localStorage.getItem("user");
+    const storedToken = sessionStorage.getItem("token");
+    const storedUserRaw = sessionStorage.getItem("user");
 
     if (storedToken && storedUserRaw) {
       try {
@@ -19,8 +17,6 @@ export function useAuthBootstrap(setUser, navigate) {
       } catch {
         sessionStorage.removeItem("token");
         sessionStorage.removeItem("user");
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
       }
     }
   }, [setUser, navigate]);

@@ -62,8 +62,6 @@ function RegisterPage({ accent, onAuthSuccess }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [rememberMe, setRememberMe] = useState(true);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [fieldError, setFieldError] = useState('');
@@ -96,8 +94,7 @@ function RegisterPage({ accent, onAuthSuccess }) {
 
     try {
       const data = await registerUser({ email, password, name });
-      // Pass rememberMe up so App can decide how to store token
-      onAuthSuccess(data, rememberMe);
+      onAuthSuccess(data);
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.error || 'Registration failed');
@@ -281,23 +278,6 @@ function RegisterPage({ accent, onAuthSuccess }) {
                       : 'Passwords do not match.'}
                   </small>
                 )}
-              </div>
-
-              {/* Remember me */}
-              <div className="form-check mb-3">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="registerRememberMe"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="registerRememberMe"
-                >
-                  Remember me on this device
-                </label>
               </div>
 
               <button

@@ -92,7 +92,12 @@ function TransactionsPanel({
           <div className="card-body">
             <div className="d-flex justify-content-between align-items-center mb-3">
               <div>
-                <h5 className="card-title mb-0">Transactions</h5>
+                <h5 className="card-title mb-0 d-flex align-items-center gap-2">
+                  Expenses
+                  <span className="badge bg-secondary">
+                    {filteredTransactions.length}
+                  </span>
+                </h5>
                 <small className="text-muted">
                   Manage your spending for the selected month.
                 </small>

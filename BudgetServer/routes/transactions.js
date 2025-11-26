@@ -9,13 +9,18 @@ const router = express.Router();
 async function validateCategoryOwnership(userId, categoryId) {
   if (!categoryId) return false;
   const cat = await Category.findOne({ _id: categoryId, userId });
-  return Boolean(cat);
+  return cat;
 }
 
 // GET /api/transactions?month=YYYY-MM
 router.get('/', async (req, res) => {
   try {
     const month = req.query.month || getCurrentMonth();
+    const categories = await Category.find({ userId: req.userId });
+    const catMap = Object.fromEntries(
+      categories.map((c) => [c._id.toString(), c.name])
+    );
+
     const txs = await Transaction.find({
       userId: req.userId,
       month,
@@ -26,6 +31,7 @@ router.get('/', async (req, res) => {
         id: t._id.toString(),
         userId: t.userId.toString(),
         categoryId: t.categoryId.toString(),
+        categoryName: catMap[t.categoryId.toString()] || undefined,
         description: t.description,
         amount: t.amount,
         date: t.date,
@@ -47,8 +53,8 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'categoryId is required' });
     }
 
-    const isOwned = await validateCategoryOwnership(req.userId, categoryId);
-    if (!isOwned) {
+    const catDoc = await validateCategoryOwnership(req.userId, categoryId);
+    if (!catDoc) {
       return res.status(400).json({ error: 'Invalid category for this user' });
     }
 
@@ -74,6 +80,7 @@ router.post('/', async (req, res) => {
       id: tx._id.toString(),
       userId: tx.userId.toString(),
       categoryId: tx.categoryId.toString(),
+      categoryName: catDoc?.name,
       description: tx.description,
       amount: tx.amount,
       date: tx.date,
@@ -100,11 +107,13 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Transaction not found' });
     }
 
+    let catDoc = null;
     if (categoryId !== undefined) {
       const isOwned = await validateCategoryOwnership(req.userId, categoryId);
       if (!isOwned) {
         return res.status(400).json({ error: 'Invalid category for this user' });
       }
+      catDoc = isOwned;
       tx.categoryId = categoryId;
     }
     if (description !== undefined) tx.description = String(description);
@@ -120,6 +129,7 @@ router.put('/:id', async (req, res) => {
       id: tx._id.toString(),
       userId: tx.userId.toString(),
       categoryId: tx.categoryId.toString(),
+      categoryName: (catDoc && catDoc.name) || undefined,
       description: tx.description,
       amount: tx.amount,
       date: tx.date,

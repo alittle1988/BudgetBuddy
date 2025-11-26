@@ -56,7 +56,7 @@ function Navbar({
                     "nav-link" + (isActive ? " active fw-semibold" : "")
                   }
                 >
-                  Transactions
+                  Expenses
                 </NavLink>
               </li>
               <li className="nav-item">

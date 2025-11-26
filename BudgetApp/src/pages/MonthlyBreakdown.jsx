@@ -3,6 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { fetchTransactions } from "../api/transactions";
 import { fetchIncomes } from "../api/incomes";
+import { fetchCategories } from "../api/categories";
+import MonthlySummary from "../components/MonthlySummary";
+import MonthlyCategoryBreakdown from "../components/MonthlyCategoryBreakdown";
+import MonthlyTables from "../components/MonthlyTables";
 
 function MonthlyBreakdown({ theme }) {
   const { year, month } = useParams();
@@ -13,6 +17,7 @@ function MonthlyBreakdown({ theme }) {
   const [error, setError] = useState("");
   const [transactions, setTransactions] = useState([]);
   const [incomes, setIncomes] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   const monthKey = `${normalizedYear}-${normalizedMonth}`;
 
@@ -25,10 +30,11 @@ function MonthlyBreakdown({ theme }) {
   useEffect(() => {
     setLoading(true);
     setError("");
-    Promise.all([fetchTransactions(monthKey), fetchIncomes(monthKey)])
-      .then(([txs, incs]) => {
+    Promise.all([fetchTransactions(monthKey), fetchIncomes(monthKey), fetchCategories(monthKey)])
+      .then(([txs, incs, cats]) => {
         setTransactions(txs);
         setIncomes(incs);
+        setCategories(cats);
       })
       .catch((err) => {
         console.error(err);
@@ -50,11 +56,33 @@ function MonthlyBreakdown({ theme }) {
     };
   }, [transactions, incomes]);
 
+  const expenseByCategory = useMemo(() => {
+    const map = {};
+    transactions.forEach((t) => {
+      const key = t.categoryId || t.categoryName || "Uncategorized";
+      const displayName = t.categoryName || "Uncategorized";
+      if (!map[key]) map[key] = { amount: 0, name: displayName, categoryId: t.categoryId };
+      map[key].amount += Number(t.amount || 0);
+    });
+    return Object.values(map).sort((a, b) => b.amount - a.amount);
+  }, [transactions]);
+
+  const incomeByCategory = useMemo(() => {
+    const map = {};
+    incomes.forEach((i) => {
+      const key = i.category || 'Other';
+      map[key] = (map[key] || 0) + Number(i.amount || 0);
+    });
+    return Object.entries(map)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, amount]) => ({ name, amount }));
+  }, [incomes]);
+
   return (
     <div className="row mt-4 mb-5">
       <div className="col-lg-10 mx-auto">
         <div
-          className={`card ${
+          className={`card shadow-sm ${
             theme === "dark" ? "bg-secondary text-light" : ""
           }`}
         >
@@ -90,94 +118,17 @@ function MonthlyBreakdown({ theme }) {
               </div>
             ) : (
               <>
-                <div className="row gy-3 mb-4">
-                  <div className="col-sm-4">
-                    <div className="p-3 border rounded bg-light">
-                      <div className="small text-muted">Income</div>
-                      <div className="fs-5 fw-semibold">
-                        ${totals.income.toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-sm-4">
-                    <div className="p-3 border rounded bg-light">
-                      <div className="small text-muted">Expenses</div>
-                      <div className="fs-5 fw-semibold">
-                        ${totals.expense.toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-sm-4">
-                    <div className="p-3 border rounded bg-light">
-                      <div className="small text-muted">Net</div>
-                      <div
-                        className={`fs-5 fw-semibold ${
-                          totals.net >= 0 ? "text-success" : "text-danger"
-                        }`}
-                      >
-                        ${totals.net.toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="col-md-6">
-                    <h6>Expenses</h6>
-                    {transactions.length === 0 ? (
-                      <p className="text-muted small">No expenses recorded.</p>
-                    ) : (
-                      <div className="table-responsive">
-                        <table className="table table-sm align-middle">
-                          <thead>
-                            <tr>
-                              <th>Date</th>
-                              <th>Description</th>
-                              <th>Amount</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {transactions.map((t) => (
-                              <tr key={t.id}>
-                                <td>{t.date}</td>
-                                <td>{t.description || "Expense"}</td>
-                                <td>${Number(t.amount || 0).toFixed(2)}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="col-md-6">
-                    <h6>Income</h6>
-                    {incomes.length === 0 ? (
-                      <p className="text-muted small">No income recorded.</p>
-                    ) : (
-                      <div className="table-responsive">
-                        <table className="table table-sm align-middle">
-                          <thead>
-                            <tr>
-                              <th>Date</th>
-                              <th>Description</th>
-                              <th>Amount</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {incomes.map((i) => (
-                              <tr key={i.id}>
-                                <td>{i.date}</td>
-                                <td>{i.description || "Income"}</td>
-                                <td>${Number(i.amount || 0).toFixed(2)}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <MonthlySummary theme={theme} totals={totals} />
+                <MonthlyCategoryBreakdown
+                  expenseByCategory={expenseByCategory}
+                  incomeByCategory={incomeByCategory}
+                  categories={categories}
+                />
+                <MonthlyTables
+                  theme={theme}
+                  transactions={transactions}
+                  incomes={incomes}
+                />
               </>
             )}
           </div>

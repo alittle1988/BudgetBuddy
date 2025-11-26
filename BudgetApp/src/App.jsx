@@ -84,23 +84,15 @@ function App() {
   // ---- Auth helpers ----
 
   // Called from login/register pages
-  function handleAuthSuccess(data, rememberMe = true) {
+  function handleAuthSuccess(data) {
     const { token, user } = data;
 
     // Always store in sessionStorage for this tab/session
     sessionStorage.setItem("token", token);
     sessionStorage.setItem("user", JSON.stringify(user));
-
-    if (rememberMe) {
-      // Persist across browser restarts
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-    } else {
-      // Ensure no persistent token if user unchecked Remember me
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-    }
-
+    // Ensure no persistent token remains
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(user);
     showToast("Signed in successfully", "success");
     navigate("/");
@@ -518,17 +510,20 @@ function App() {
               />
 
               {/* Settings */}
-              <Route
-                path="/settings"
-                element={
-                  <SettingsPage
-                    theme={theme}
-                    accent={accent}
-                    onThemeChange={setTheme}
-                    onAccentChange={setAccent}
-                  />
-                }
-              />
+            <Route
+              path="/settings"
+              element={
+                <SettingsPage
+                  theme={theme}
+                  accent={accent}
+                  user={user}
+                  onThemeChange={setTheme}
+                  onAccentChange={setAccent}
+                  onUserUpdate={setUser}
+                  onShowToast={showToast}
+                />
+              }
+            />
 
               {/* 404 */}
               <Route path="*" element={<NotFound />} />

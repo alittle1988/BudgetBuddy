@@ -100,18 +100,18 @@ async function run() {
 
   months.forEach((month) => {
     for (let i = 0; i < 5; i += 1) {
-      allIncomes.push({
+      const category = randChoice(['Tips', 'Checks', 'Other']);
+      const incomeEntry = {
         userId: user._id,
         description:
-          i === 0
-            ? 'Salary'
-            : i === 1
-            ? 'Bonus'
-            : `Side Gig ${i}`,
+          category === 'Tips' ? 'Tips' : category === 'Checks' ? 'Check' : 'Income',
         amount: Number(randomInRange(500, 4500).toFixed(2)),
+        category,
+        hoursWorked: category === 'Tips' ? Number(randomInRange(2, 10).toFixed(1)) : null,
         date: `${month}-${String(randChoice([1, 5, 10, 15, 20, 25])).padStart(2, '0')}`,
         month,
-      });
+      };
+      allIncomes.push(incomeEntry);
     }
 
     const categoryNames = baseCategories.map((c) => c.name);

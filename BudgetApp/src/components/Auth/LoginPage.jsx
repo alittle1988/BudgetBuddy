@@ -7,7 +7,6 @@ function LoginPage({ accent, onAuthSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -18,8 +17,7 @@ function LoginPage({ accent, onAuthSuccess }) {
     setLoading(true);
     try {
       const data = await loginUser({ email, password });
-      // Pass rememberMe up
-      onAuthSuccess(data, rememberMe);
+      onAuthSuccess(data);
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.error || 'Login failed');
@@ -75,22 +73,6 @@ function LoginPage({ accent, onAuthSuccess }) {
                     {showPassword ? 'Hide' : 'Show'}
                   </button>
                 </div>
-              </div>
-
-              <div className="form-check mb-3">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="loginRememberMe"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="loginRememberMe"
-                >
-                  Remember me on this device
-                </label>
               </div>
 
               <button

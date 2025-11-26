@@ -10,6 +10,7 @@ const categoryRoutes = require('./routes/categories');
 const transactionRoutes = require('./routes/transactions');
 const incomeRoutes = require('./routes/incomes');
 const netWorthRoutes = require('./routes/netWorth');
+const userRoutes = require('./routes/users');
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/incomes', incomeRoutes);
 app.use('/api/net-worth', netWorthRoutes);
+app.use('/api/users', userRoutes);
 
 // ----- Start -----
 const PORT = process.env.PORT || 4000;
