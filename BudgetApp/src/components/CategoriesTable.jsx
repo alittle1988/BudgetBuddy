@@ -1,4 +1,5 @@
 import CategoryRow from './CategoryRow';
+import { Link } from 'react-router-dom';
 
 function CategoriesTable({
   theme,
@@ -57,7 +58,7 @@ function CategoriesTable({
               </div>
             )}
 
-            <div className="d-flex justify-content-end mt-3">
+            <div className="d-flex justify-content-end gap-2 mt-3">
               <button
                 type="button"
                 className={`btn btn-${accent}`}
@@ -66,6 +67,12 @@ function CategoriesTable({
               >
                 + Add Category
               </button>
+              <Link to="/income" className={`btn btn-outline-${accent}`}>
+                Add Income
+              </Link>
+              <Link to="/transactions" className={`btn btn-outline-${accent}`}>
+                Add Expense
+              </Link>
             </div>
           </div>
         </div>

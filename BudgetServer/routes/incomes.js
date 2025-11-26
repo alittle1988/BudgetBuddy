@@ -79,6 +79,52 @@ router.post('/', async (req, res) => {
   }
 });
 
+// PUT /api/incomes/:id
+router.put('/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { description, amount, date, category, hoursWorked } = req.body;
+
+    const inc = await Income.findOne({
+      _id: id,
+      userId: req.userId,
+    });
+
+    if (!inc) {
+      return res.status(404).json({ error: 'Income not found' });
+    }
+
+    if (description !== undefined) inc.description = String(description);
+    if (amount !== undefined) inc.amount = Number(amount) || 0;
+    if (date !== undefined) {
+      inc.date = date;
+      inc.month = date.slice(0, 7);
+    }
+    if (category !== undefined) {
+      inc.category = ALLOWED_CATEGORIES.includes(category) ? category : 'Other';
+    }
+    if (hoursWorked !== undefined) {
+      inc.hoursWorked = inc.category === 'Tips' ? Number(hoursWorked) || 0 : null;
+    }
+
+    await inc.save();
+
+    res.json({
+      id: inc._id.toString(),
+      userId: inc.userId.toString(),
+      description: inc.description,
+      amount: inc.amount,
+      category: inc.category,
+      hoursWorked: inc.hoursWorked,
+      date: inc.date,
+      month: inc.month,
+    });
+  } catch (err) {
+    console.error('Update income error:', err);
+    res.status(500).json({ error: 'Failed to update income' });
+  }
+});
+
 // DELETE /api/incomes/:id
 router.delete('/:id', async (req, res) => {
   try {

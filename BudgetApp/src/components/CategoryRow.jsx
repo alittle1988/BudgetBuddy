@@ -15,16 +15,21 @@ function CategoryRow({ accent, category, spent, onLocalChange, onSave, onDelete 
         />
       </td>
       <td>
-        <input
-          type="number"
-          className="form-control form-control-sm"
-          value={category.budget}
-          onChange={(e) =>
-            onLocalChange(category.id, 'budget', e.target.value)
-          }
-          min="0"
-          step="0.01"
-        />
+        <div className="input-group input-group-sm">
+          <span className="input-group-text" aria-hidden="true">
+            $
+          </span>
+          <input
+            type="number"
+            className="form-control form-control-sm"
+            value={category.budget}
+            onChange={(e) =>
+              onLocalChange(category.id, 'budget', e.target.value)
+            }
+            min="0"
+            step="0.01"
+          />
+        </div>
       </td>
       <td>${spent.toFixed(2)}</td>
       <td className={over ? 'text-danger fw-semibold' : ''}>

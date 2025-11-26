@@ -58,7 +58,13 @@ function TransactionRow({ transaction, categories, onUpdate, onDelete, accent })
   }
 
   return (
-    <tr>
+    <tr
+      role={!isEditing ? "button" : undefined}
+      style={!isEditing ? { cursor: 'pointer' } : undefined}
+      onClick={() => {
+        if (!isEditing) setIsEditing(true);
+      }}
+    >
       <td>
         {isEditing ? (
           <input

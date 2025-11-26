@@ -6,6 +6,7 @@ import { fetchIncomes } from "../api/incomes";
 import { fetchCategories } from "../api/categories";
 import MonthlySummary from "../components/MonthlySummary";
 import MonthlyCategoryBreakdown from "../components/MonthlyCategoryBreakdown";
+import MonthlyGasBreakdown from "../components/MonthlyGasBreakdown";
 import MonthlyTables from "../components/MonthlyTables";
 
 function MonthlyBreakdown({ theme }) {
@@ -124,6 +125,7 @@ function MonthlyBreakdown({ theme }) {
                   incomeByCategory={incomeByCategory}
                   categories={categories}
                 />
+                <MonthlyGasBreakdown transactions={transactions} />
                 <MonthlyTables
                   theme={theme}
                   transactions={transactions}

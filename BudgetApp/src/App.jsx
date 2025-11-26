@@ -17,7 +17,7 @@ import {
   updateTransaction,
 } from "./api/transactions";
 
-import { fetchIncomes, createIncome, deleteIncome } from "./api/incomes";
+import { fetchIncomes, createIncome, deleteIncome, updateIncome } from "./api/incomes";
 
 import { fetchNetWorth } from "./api/netWorth";
 
@@ -361,6 +361,23 @@ function App() {
     }
   }
 
+  async function handleUpdateIncome(id, data) {
+    try {
+      setError("");
+      const updated = await updateIncome(id, data);
+      setIncomes((prev) =>
+        prev
+          .map((i) => (i.id === id ? updated : i))
+          .filter((i) => i.month === selectedMonth)
+      );
+      showToast("Income updated", "info");
+      await refreshNetWorth();
+    } catch (err) {
+      console.error(err);
+      setError("Failed to update income");
+    }
+  }
+
   // ---- Render ----
 
   return (
@@ -485,14 +502,15 @@ function App() {
                 element={
                   <IncomePanel
                     theme={theme}
-                    accent={accent}
-                    incomes={incomes}
-                    selectedMonth={selectedMonth}
-                    onAddIncome={handleAddIncome}
-                    onDeleteIncome={handleDeleteIncome}
-                  />
-                }
-              />
+                  accent={accent}
+                  incomes={incomes}
+                  selectedMonth={selectedMonth}
+                  onAddIncome={handleAddIncome}
+                  onDeleteIncome={handleDeleteIncome}
+                  onUpdateIncome={handleUpdateIncome}
+                />
+              }
+            />
 
               <Route
                 path="/yearly"

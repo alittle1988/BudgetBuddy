@@ -1,5 +1,5 @@
 // src/pages/TransactionsPanel.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import TransactionRow from '../components/TransactionRow';
 
@@ -79,6 +79,12 @@ function TransactionsPanel({
   const filteredTransactions = filterCategoryId
     ? transactions.filter((t) => t.categoryId === filterCategoryId)
     : transactions;
+
+  const sortedTransactions = useMemo(() => {
+    return [...filteredTransactions].sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    );
+  }, [filteredTransactions]);
 
 
   return (
@@ -204,7 +210,7 @@ function TransactionsPanel({
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredTransactions.map((t) => (
+                    {sortedTransactions.map((t) => (
                       <TransactionRow
                         key={t.id}
                         transaction={t}
