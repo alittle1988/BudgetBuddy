@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { fetchTransactions } from "../api/transactions";
 import { fetchIncomes } from "../api/incomes";
-import { fetchCategories } from "../api/categories";
+import { fetchCategories, fetchAllCategories } from "../api/categories";
 import MonthlySummary from "../components/MonthlySummary";
 import MonthlyCategoryBreakdown from "../components/MonthlyCategoryBreakdown";
 import MonthlyGasBreakdown from "../components/MonthlyGasBreakdown";
@@ -19,6 +19,7 @@ function MonthlyBreakdown({ theme }) {
   const [transactions, setTransactions] = useState([]);
   const [incomes, setIncomes] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
 
   const monthKey = `${normalizedYear}-${normalizedMonth}`;
 
@@ -31,11 +32,17 @@ function MonthlyBreakdown({ theme }) {
   useEffect(() => {
     setLoading(true);
     setError("");
-    Promise.all([fetchTransactions(monthKey), fetchIncomes(monthKey), fetchCategories(monthKey)])
-      .then(([txs, incs, cats]) => {
+    Promise.all([
+      fetchTransactions(monthKey),
+      fetchIncomes(monthKey),
+      fetchCategories(monthKey),
+      fetchAllCategories(),
+    ])
+      .then(([txs, incs, cats, allCats]) => {
         setTransactions(txs);
         setIncomes(incs);
         setCategories(cats);
+        setAllCategories(allCats);
       })
       .catch((err) => {
         console.error(err);
@@ -94,11 +101,19 @@ function MonthlyBreakdown({ theme }) {
                 <small className="text-muted">Details for {monthName}</small>
               </div>
               <div className="d-flex gap-2">
-                <Link to="/yearly" className="btn btn-sm btn-outline-secondary">
-                  ⬅ Back to Yearly
+                <Link
+                  to="/yearly"
+                  className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+                >
+                  <span aria-hidden="true">←</span>
+                  <span>Yearly</span>
                 </Link>
-                <Link to="/" className="btn btn-sm btn-outline-secondary">
-                  Dashboard
+                <Link
+                  to="/"
+                  className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+                >
+                  <span aria-hidden="true">←</span>
+                  <span>Dashboard</span>
                 </Link>
               </div>
             </div>
@@ -123,7 +138,7 @@ function MonthlyBreakdown({ theme }) {
                 <MonthlyCategoryBreakdown
                   expenseByCategory={expenseByCategory}
                   incomeByCategory={incomeByCategory}
-                  categories={categories}
+                  categories={allCategories.length ? allCategories : categories}
                 />
                 <MonthlyGasBreakdown transactions={transactions} />
                 <MonthlyTables

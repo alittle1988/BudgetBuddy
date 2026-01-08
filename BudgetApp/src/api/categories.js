@@ -5,6 +5,11 @@ export async function fetchCategories(month) {
   return res.data;
 }
 
+export async function fetchAllCategories() {
+  const res = await client.get('/categories', { params: { all: true } });
+  return res.data;
+}
+
 export async function createCategory(data) {
   const res = await client.post('/categories', data);
   return res.data;

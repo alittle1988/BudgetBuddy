@@ -6,9 +6,27 @@ const { getCurrentMonth } = require('../utils/date');
 
 const router = express.Router();
 
-// GET /api/categories?month=YYYY-MM
+// GET /api/categories?month=YYYY-MM or /api/categories?all=true
 router.get('/', async (req, res) => {
   try {
+    const { all } = req.query;
+    if (all === 'true') {
+      const cats = await Category.find({ userId: req.userId }).sort({ createdAt: -1 });
+      const byName = new Map();
+      cats.forEach((c) => {
+        if (!byName.has(c.name)) {
+          byName.set(c.name, {
+            id: c._id.toString(),
+            userId: c.userId.toString(),
+            name: c.name,
+            budget: c.budget,
+            month: c.month,
+          });
+        }
+      });
+      return res.json(Array.from(byName.values()));
+    }
+
     const month = req.query.month || getCurrentMonth();
     const cats = await Category.find({
       userId: req.userId,

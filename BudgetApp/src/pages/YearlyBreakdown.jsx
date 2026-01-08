@@ -111,8 +111,12 @@ function YearlyBreakdown({ theme, accent, user }) {
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
                 />
-                <Link to="/" className="btn btn-sm btn-outline-secondary">
-                  ⬅ Back
+                <Link
+                  to="/"
+                  className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+                >
+                  <span aria-hidden="true">←</span>
+                  <span>Dashboard</span>
                 </Link>
               </div>
             </div>

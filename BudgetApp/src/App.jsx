@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 
 import {
   fetchCategories,
+  fetchAllCategories,
   createCategory,
   updateCategory,
   deleteCategory,
@@ -60,6 +61,7 @@ function App() {
   const [incomes, setIncomes] = useState([]);
   const [netWorthData, setNetWorthData] = useState([]);
   const [netWorthLoading, setNetWorthLoading] = useState(true);
+  const [allCategories, setAllCategories] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -158,14 +160,18 @@ function App() {
       try {
         setLoading(true);
         setError("");
-        const [cats, txs, incs] = await Promise.all([
+        const [cats, txs, incs, allCats] = await Promise.all([
           fetchCategories(selectedMonth),
           fetchTransactions(selectedMonth),
           fetchIncomes(selectedMonth),
+          fetchAllCategories(),
         ]);
-        setCategories(cats);
+        const sortByName = (arr) =>
+          [...arr].sort((a, b) => a.name.localeCompare(b.name));
+        setCategories(sortByName(cats));
         setTransactions(txs);
         setIncomes(incs);
+        setAllCategories(sortByName(allCats));
         await refreshNetWorth();
       } catch (err) {
         console.error(err);
@@ -212,6 +218,16 @@ function App() {
   }, {});
 
   // ---------- Category handlers ----------
+  async function refreshAllCategories() {
+    try {
+      const catAll = await fetchAllCategories();
+      setAllCategories(
+        [...catAll].sort((a, b) => a.name.localeCompare(b.name))
+      );
+    } catch (err) {
+      console.error("Failed to load all categories", err);
+    }
+  }
 
   async function handleAddCategory(e) {
     e.preventDefault();
@@ -224,7 +240,10 @@ function App() {
         budget: newBudget,
         month: selectedMonth,
       });
-      setCategories((prev) => [...prev, newCat]);
+      setCategories((prev) =>
+        [...prev, newCat].sort((a, b) => a.name.localeCompare(b.name))
+      );
+      await refreshAllCategories();
       setNewName("");
       setNewBudget("");
       showToast("Category added", "success");
@@ -255,8 +274,11 @@ function App() {
         budget: category.budget,
       });
       setCategories((prev) =>
-        prev.map((c) => (c.id === category.id ? updated : c))
+        prev
+          .map((c) => (c.id === category.id ? updated : c))
+          .sort((a, b) => a.name.localeCompare(b.name))
       );
+      await refreshAllCategories();
       showToast("Category updated", "info");
     } catch (err) {
       console.error(err);
@@ -271,6 +293,7 @@ function App() {
       await deleteCategory(id);
       setCategories((prev) => prev.filter((c) => c.id !== id));
       setTransactions((prev) => prev.filter((t) => t.categoryId !== id));
+      await refreshAllCategories();
       showToast("Category deleted", "warning");
       await refreshNetWorth();
     } catch (err) {
@@ -456,7 +479,7 @@ function App() {
                     <CategoriesTable
                       theme={theme}
                       accent={accent}
-                      categories={categories}
+                      categories={allCategories.length ? allCategories : categories}
                       loading={loading}
                       spentByCategory={spentByCategory}
                       onLocalChange={handleLocalCategoryChange}
@@ -486,6 +509,7 @@ function App() {
                     theme={theme}
                     accent={accent}
                     categories={categories}
+                    allCategories={allCategories.length ? allCategories : categories}
                     transactions={transactions}
                     selectedMonth={selectedMonth}
                     userId={user?.id}

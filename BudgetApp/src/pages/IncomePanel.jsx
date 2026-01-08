@@ -110,8 +110,12 @@ function IncomePanel({
                   Track your income for the selected month.
                 </small>
               </div>
-              <Link to="/" className="btn btn-sm btn-outline-secondary">
-                ⬅ Back to Dashboard
+              <Link
+                to="/"
+                className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+              >
+                <span aria-hidden="true">←</span>
+                <span>Dashboard</span>
               </Link>
             </div>
 

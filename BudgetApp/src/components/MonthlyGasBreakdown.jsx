@@ -7,9 +7,13 @@ function MonthlyGasBreakdown({ transactions }) {
       (t.categoryName || "").toLowerCase() === "gas"
     );
     const total = gasTx.reduce((sum, t) => sum + Number(t.amount || 0), 0);
+    const gallons = gasTx.reduce(
+      (sum, t) => sum + Number(t.description || 0),
+      0
+    );
     const count = gasTx.length;
-    const average = count ? total / count : 0;
-    return { total, count, average };
+    const dollarPerGallon = gallons ? total / gallons : 0;
+    return { total, gallons, count, dollarPerGallon };
   }, [transactions]);
 
   return (
@@ -19,7 +23,7 @@ function MonthlyGasBreakdown({ transactions }) {
         <div className="row gy-2">
           <div className="col-sm-4">
             <div className="p-3 border rounded bg-light">
-              <div className="small text-muted">Total Gas Spend</div>
+              <div className="small text-muted">Total Dollars Spent</div>
               <div className="fs-6 fw-semibold">
                 ${gasStats.total.toFixed(2)}
               </div>
@@ -27,15 +31,15 @@ function MonthlyGasBreakdown({ transactions }) {
           </div>
           <div className="col-sm-4">
             <div className="p-3 border rounded bg-light">
-              <div className="small text-muted">Gas Transactions</div>
-              <div className="fs-6 fw-semibold">{gasStats.count}</div>
+              <div className="small text-muted">Gallons</div>
+              <div className="fs-6 fw-semibold">{gasStats.gallons.toFixed(3)}</div>
             </div>
           </div>
           <div className="col-sm-4">
             <div className="p-3 border rounded bg-light">
-              <div className="small text-muted">Avg per Gas Transaction</div>
+              <div className="small text-muted">Dollar per Gallon</div>
               <div className="fs-6 fw-semibold">
-                ${gasStats.average.toFixed(2)}
+                ${gasStats.dollarPerGallon.toFixed(2)}
               </div>
             </div>
           </div>

@@ -7,6 +7,7 @@ function TransactionsPanel({
   theme,
   accent,
   categories,
+  allCategories,
   transactions,
   selectedMonth,
   userId,
@@ -21,6 +22,10 @@ function TransactionsPanel({
   const [date, setDate] = useState(
     `${selectedMonth}-01`.slice(0, 10) // default first of month
   );
+  const selectableCategories = allCategories?.length ? allCategories : categories;
+  const selectedCategory = selectableCategories.find((c) => c.id === categoryId);
+  const isGasCategory =
+    (selectedCategory?.name || '').trim().toLowerCase() === 'gas';
   const [filterCategoryId, setFilterCategoryId] = useState(() => {
     try {
       return localStorage.getItem(filterStorageKey) || '';
@@ -54,11 +59,11 @@ function TransactionsPanel({
   }, [selectedMonth]);
 
   useEffect(() => {
-    if (!categories.length) return;
-    if (filterCategoryId && !categories.some((c) => c.id === filterCategoryId)) {
+    if (!selectableCategories.length) return;
+    if (filterCategoryId && !selectableCategories.some((c) => c.id === filterCategoryId)) {
       setFilterCategoryId('');
     }
-  }, [categories, filterCategoryId]);
+  }, [selectableCategories, filterCategoryId]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -110,8 +115,12 @@ function TransactionsPanel({
               </div>
 
               <div className="d-flex align-items-center gap-2">
-                <Link to="/" className="btn btn-sm btn-outline-secondary">
-                  ⬅ Back to Dashboard
+                <Link
+                  to="/"
+                  className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+                >
+                  <span aria-hidden="true">←</span>
+                  <span>Dashboard</span>
                 </Link>
 
                 <div className="d-flex align-items-center gap-2">
@@ -123,7 +132,7 @@ function TransactionsPanel({
                     onChange={(e) => setFilterCategoryId(e.target.value)}
                   >
                     <option value="">All</option>
-                    {categories.map((c) => (
+                    {selectableCategories.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
                       </option>
@@ -143,7 +152,7 @@ function TransactionsPanel({
                   onChange={(e) => setCategoryId(e.target.value)}
                 >
                   <option value="">Select...</option>
-                  {categories.map((c) => (
+                  {selectableCategories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
                     </option>
@@ -151,13 +160,17 @@ function TransactionsPanel({
                 </select>
               </div>
               <div className="col-md-3">
-                <label className="form-label">Description</label>
+                <label className="form-label">
+                  {isGasCategory ? 'Gallons' : 'Description'}
+                </label>
                 <input
-                  type="text"
+                  type={isGasCategory ? 'number' : 'text'}
                   className="form-control"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="e.g. Groceries"
+                  placeholder={isGasCategory ? 'e.g. 10.500' : 'e.g. Groceries'}
+                  min={isGasCategory ? '0' : undefined}
+                  step={isGasCategory ? '0.001' : undefined}
                 />
               </div>
               <div className="col-md-2">
@@ -214,7 +227,7 @@ function TransactionsPanel({
                       <TransactionRow
                         key={t.id}
                         transaction={t}
-                        categories={categories}
+                        categories={selectableCategories}
                         onUpdate={onUpdateTransaction}
                         onDelete={onDeleteTransaction}
                       />
