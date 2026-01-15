@@ -196,7 +196,8 @@ function App() {
   }
 
   // Derived totals
-  const totalBudget = categories.reduce(
+  const summaryCategories = allCategories.length ? allCategories : categories;
+  const totalBudget = summaryCategories.reduce(
     (sum, c) => sum + Number(c.budget || 0),
     0
   );
@@ -459,7 +460,7 @@ function App() {
                   <>
                     <SummaryCard
                       theme={theme}
-                      categories={categories}
+                      categories={summaryCategories}
                       totalBudget={totalBudget}
                       totalSpent={totalSpent}
                       totalIncome={totalIncome}
